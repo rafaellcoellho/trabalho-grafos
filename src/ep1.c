@@ -1,10 +1,8 @@
 /*
- * Exercicio programa da disciplina de grafos 2019.1 IFCE              
- * Alunos: Adauto Pinheiro, Gabriel Palhares, 
- *         Mario Matheus, Rafael Coelho e Wagner Matheus        							     
+ * Exercicio programa da disciplina de grafos 2019.1 IFCE
+ * Alunos: Adauto Pinheiro, Gabriel Palhares,
+ *         Mario Matheus, Rafael Coelho e Wagner Matheus
  */
-
-
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -13,13 +11,44 @@
 #define MAXV 150
 #define INFINITO 10000
 
+// Protótipo de funções
+FILE *abre_arquivo(void);
+void le_arquivo(FILE *arquivo, int n_vertices, int n_arcos, int *custos);
+void dijkstra(int vertices, int origem, int destino, int *custos);
+
+int main(){
+    // Quantidade de vertice e arcos
+    int n_vertices = 0,n_arcos = 0;
+    // Vertice origem e destino
+    int v_origem = 0, v_destino = 0;
+    // Lista de adjacências
+    int *custos  = NULL;
+
+    FILE *arquivo = abre_arquivo();
+
+    //Lê o arquivo
+    fscanf(arquivo, "%d %d %d %d", &n_vertices, &n_arcos, &v_origem, &v_destino); //Lê a primeira linha do arquivo
+
+    // Inicia os custos com -1
+    custos = (int*) malloc(sizeof(int) * n_vertices * n_vertices);
+    for(int i = 0; i <= n_vertices * n_vertices; i++) custos[i] = -1;
+    
+    // Preenche os custos de acordo com o arquivo
+    le_arquivo(arquivo, n_vertices, n_arcos, custos);
+    fclose(arquivo);
+
+    dijkstra(n_vertices, v_origem, v_destino, custos);
+
+    return 0;
+}
+
 /*
- * le_arquivo() - Le um arquivo com a descricao de um grafo definida no escopo do trabalho.
+ * abre_arquivo() - Abreum arquivo com a descricao de um grafo definida no escopo do trabalho.
  *
  * Retorno: Uma referencia para o arquivo lido. 
- *          Quem chama a funcao eh que libera o arquivo.
+ *          Quem chama a funcao eh que libera a memória do arquivo.
  */
-FILE *le_arquivo(void)
+FILE *abre_arquivo(void)
 {
     FILE *arquivo = NULL;
     char caminho[50];
@@ -36,101 +65,89 @@ FILE *le_arquivo(void)
     return arquivo;
 }
 
+/*
+ * le_arquivo() - Le um arquivo e preenche o vetor de custo;.
+ *
+ * @arquivo: Ponteiro para o arquivo aberto;
+ * @n_vertices: Numero de vertices do grafo;
+ * @n_arcos: Numero de arcos do grafo;
+ * @custos: Lista de adjacência que vai ser preenchida com os custos de cada arco;
+ */
+void le_arquivo(FILE *arquivo, int n_vertices, int n_arcos, int *custos)
+{
+    int origem, destino;
+    for(int i = 0; i < n_arcos; i++) { 
+        fscanf(arquivo, "%d %d", &origem, &destino);
+        //Armazena os custos na lista de adjacências
+        fscanf(arquivo, "%d", &custos[(origem-1)*n_vertices+destino-1]); 
+    }
+}
+
+
 void dijkstra(int vertices, int origem, int destino, int *custos)
 { 
-	int i = 0; 		   //contador
-	int v = 0;         //variável auxiliar vértice v
-	int ant[MAXV];     //vetor dos predecessores 
-	int z[MAXV];       //vértices para os quais se conhece o caminho mínimo
-	double min;        //variável auxiliar 
-	double dist[MAXV]; //vetor com os custos dos caminhos 
-	
-	//Inicialização
-	for(i = 0; i < vertices; i++){
-		if(custos[i] != -1){
-			ant[i] = origem-1; 
-			dist[i] = custos[i];
-		}
-		else{
-			ant[i] = -1;
-			dist[i] = INFINITO;
-		}
-		z[i] = 0;
-	}
-	z[origem-1] = 1;    
-	dist[origem-1] = 0; 
+    int i = 0;          //contador
+    int v = 0;          //variável auxiliar vértice v
+    int anterior[MAXV];      //vetor dos predecessores
+    int fronteira[MAXV];        //vértices para os quais se conhece o caminho mínimo
+    double min;         //variável auxiliar
+    double distancia[MAXV];  //vetor com os custos dos caminhos
 
-	//Insere o novo vértice que se conhece o caminho mínimo no conjunto z  
-	while(v != destino-1 && min != INFINITO){ 
-		min = INFINITO; 
-		
-		for(i = 0; i < vertices; i++){
-			if(z[i] == 0){ 
-				if(dist[i] >= 0 && dist[i] < min){ 
-					min = dist[i]; 
-					v = i; 
-				}
-			}
-		}
-
-		//Distâncias dos novos vizinhos de z
-		if(min != INFINITO && v != destino-1){ 
-			z[v] = 1; 
-			for(i = 0; i < vertices; i++)
-				if(z[i] == 0){ 
-					if(custos[v*vertices+i] != -1 && dist[v]+custos[v*vertices+i] < dist[i]){ 
-						dist[i] = dist[v]+custos[v*vertices+i]; 
-						ant[i] = v; 
-					}
-				}
-		}
-  }//Fim de while(v != destino-1 && min != INFINITO)
-
-  //Imprime caminho mínimo de origem a destino
-	if(min == INFINITO)
-		printf("\nNão existe caminho entre os vértices %d e %d.\n", origem, destino);
-	else{
-		printf("\nCaminho mínimo do vértice %d para o vértice %d: \n",
-		   origem, destino);
-   
-		i = destino;
-		printf("%d", i);
-		i = ant[i-1];
-		
-		while(i !=-1) {
-			printf(" <- %d", i+1);
-			i = ant[i];
-		}
-		printf("\nCusto = %d\n", (int)dist[destino-1]);
-	}
-}//dijkstra
-
-int main(){
-    // Quantidade de vertice e arcos
-    int n_vertices = 0,n_arcos = 0; 		
-    int origem   = 0;     	//vértice origem dijkstra
-    int destino  = 0;    	//vértice destino dijkstra
-    int origemU  = 0;    	//vértice origem de cada arco do grafo
-    int destinoV = 0;   	//vértice destino de cada arco do grafo
-    int *custos  = NULL; 	//lista de adjacências 
-
-    FILE *arquivo = le_arquivo();
-
-    //Lê o arquivo e armazena os valores nas variáveis
-    fscanf(arquivo, "%d %d %d %d", &n_vertices, &n_arcos, &origem, &destino); //Lê a primeira linha do arquivo
-
-    custos = (int*) malloc(sizeof(int) * n_vertices * n_vertices);
-    for(int i = 0; i <= n_vertices * n_vertices; i++) custos[i] = -1;
-
-    //Lê o arquivo a partir da segunda linha e armazena as variáveis
-    for(int j = 0; j < n_arcos; j++) { 
-        fscanf(arquivo, "%d %d", &origemU, &destinoV);
-        //Armazena os custos na lista de adjacências
-        fscanf(arquivo, "%d", &custos[(origemU-1)*n_vertices+destinoV-1]); 
+    //Inicialização
+    for(i = 0; i < vertices; i++) {
+        if(custos[i] != -1) {
+            anterior[i] = origem-1; 
+            distancia[i] = custos[i];
+        } else {
+            anterior[i] = -1;
+            distancia[i] = INFINITO;
+        }
+        fronteira[i] = 0;
     }
-    fclose(arquivo);
+    fronteira[origem-1] = 1;
+    distancia[origem-1] = 0;
 
-    dijkstra(n_vertices, origem, destino, custos);
+    //Insere o novo vértice que se conhece o caminho mínimo no conjunto fronteira
+    while(v != destino-1 && min != INFINITO){
+        min = INFINITO; 
 
-    return 0;
+        for(i = 0; i < vertices; i++){
+            if(fronteira[i] == 0){
+                if(distancia[i] >= 0 && distancia[i] < min){
+                    min = distancia[i];
+                    v = i;
+                }
+            }
+        }
+
+        //Distâncias dos novos vizinhos de fronteira
+        if(v != destino-1 && min != INFINITO) {
+            fronteira[v] = 1;
+            for(i = 0; i < vertices; i++)
+                if(fronteira[i] == 0) {
+                    if(custos[v*vertices+i] != -1 && distancia[v]+custos[v*vertices+i] < distancia[i]) {
+                        distancia[i] = distancia[v]+custos[v*vertices+i];
+                        anterior[i] = v;
+                    }
+                }
+        }
+    }
+
+    //Imprime caminho mínimo de origem a destino
+    if(min == INFINITO) {
+        printf("\nNão existe caminho entre os vértices %d e %d.\n", origem, destino);
+    } else {
+        printf("\nCaminho mínimo do vértice %d para o vértice %d: \n", origem, destino);
+
+        i = destino;
+        printf("%d", i);
+        i = anterior[i-1];
+
+        while(i !=-1) {
+            printf(" <- %d", i+1);
+            i = anterior[i];
+        }
+        printf("\nCusto = %d\n", (int)distancia[destino-1]);
+    }
 }
+
