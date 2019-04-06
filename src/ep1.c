@@ -9,12 +9,12 @@
 #include <string.h>
 #include <math.h>
 
-#define MAXV 150
+#define MAX_VERTICES 150
 
 // Protótipo de funções
 FILE *abre_arquivo(void);
 void le_arquivo(FILE *arquivo, int n_vertices, int n_arcos, int *custos);
-void dijkstra(int vertices, int origem, int destino, int *custos);
+void dijkstra(int n_vertices, int origem, int destino, int *custos);
 
 // Rotina principal
 int main()
@@ -56,7 +56,7 @@ FILE *abre_arquivo(void)
     char caminho[50];
 
     while(arquivo == NULL) {
-        printf("Insira o caminho do arquivo e pressione Enter: \n");
+        printf("Nome do arquivo: ");
         fgets(caminho, sizeof(caminho), stdin);
         //Remove o último caractere do caminho, pois o fgets armazena a quebra de linha '\n'
         char *p_chr = strchr(caminho, '\n'); 
@@ -86,12 +86,19 @@ void le_arquivo(FILE *arquivo, int n_vertices, int n_arcos, int *custos)
     }
 }
 
-
-void dijkstra(int vertices, int origem, int destino, int *custos)
+/*
+ * dijkstra() - Apresenta na tela o caminho de menor custo em um grafo.
+ *
+ * @n_vertices: Numero de vertices do grafo;
+ * @origem: Vertice origem
+ * @destino: Vertice destino
+ * @custos: Lista de adjacência com os custos de cada arco;
+ */
+void dijkstra(int n_vertices, int origem, int destino, int *custos)
 {   
-    int anterior[MAXV];
-    int fronteira[MAXV];
-    double distancia[MAXV];
+    int anterior[MAX_VERTICES];
+    int fronteira[MAX_VERTICES];
+    double distancia[MAX_VERTICES];
 
     //Variaveis auxiliares
     int i = 0;
@@ -99,7 +106,7 @@ void dijkstra(int vertices, int origem, int destino, int *custos)
     double min;
 
     //Inicialização
-    for(i = 0; i < vertices; i++) {
+    for(i = 0; i < n_vertices; i++) {
         if(custos[i] != -1) {
             anterior[i] = origem-1; 
             distancia[i] = custos[i];
@@ -115,7 +122,7 @@ void dijkstra(int vertices, int origem, int destino, int *custos)
     while(v != destino-1 && min != INFINITY){
         min = INFINITY; 
 
-        for(i = 0; i < vertices; i++){
+        for(i = 0; i < n_vertices; i++){
             if(fronteira[i] == 0){
                 if(distancia[i] >= 0 && distancia[i] < min){
                     min = distancia[i];
@@ -127,10 +134,10 @@ void dijkstra(int vertices, int origem, int destino, int *custos)
         //Distâncias dos novos vizinhos de fronteira
         if(v != destino-1 && min != INFINITY) {
             fronteira[v] = 1;
-            for(i = 0; i < vertices; i++)
+            for(i = 0; i < n_vertices; i++)
                 if(fronteira[i] == 0) {
-                    if(custos[v*vertices+i] != -1 && distancia[v]+custos[v*vertices+i] < distancia[i]) {
-                        distancia[i] = distancia[v]+custos[v*vertices+i];
+                    if(custos[v*n_vertices+i] != -1 && distancia[v]+custos[v*n_vertices+i] < distancia[i]) {
+                        distancia[i] = distancia[v]+custos[v*n_vertices+i];
                         anterior[i] = v;
                     }
                 }
