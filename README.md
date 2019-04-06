@@ -1,6 +1,6 @@
 # Trabalho Grafos 
 
-Trabalho de calculo numérico - IFCE 2019.1
+Trabalho de grafos - IFCE 2019.1
 
 ## Pre-requisitos
 
@@ -14,7 +14,3 @@ $ cd build
 $ ninja
 $ ./src/main
 ```
-
-## Autor
-
-* **Rafael Coelho** - [rafaellcoellho](https://github.com/rafaellcoellho)
