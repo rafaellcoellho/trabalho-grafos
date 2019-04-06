@@ -7,16 +7,18 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <math.h>
 
 #define MAXV 150
-#define INFINITO 10000
 
 // Protótipo de funções
 FILE *abre_arquivo(void);
 void le_arquivo(FILE *arquivo, int n_vertices, int n_arcos, int *custos);
 void dijkstra(int vertices, int origem, int destino, int *custos);
 
-int main(){
+// Rotina principal
+int main()
+{
     // Quantidade de vertice e arcos
     int n_vertices = 0,n_arcos = 0;
     // Vertice origem e destino
@@ -27,7 +29,7 @@ int main(){
     FILE *arquivo = abre_arquivo();
 
     //Lê o arquivo
-    fscanf(arquivo, "%d %d %d %d", &n_vertices, &n_arcos, &v_origem, &v_destino); //Lê a primeira linha do arquivo
+    fscanf(arquivo, "%d %d %d %d", &n_vertices, &n_arcos, &v_origem, &v_destino);
 
     // Inicia os custos com -1
     custos = (int*) malloc(sizeof(int) * n_vertices * n_vertices);
@@ -43,7 +45,7 @@ int main(){
 }
 
 /*
- * abre_arquivo() - Abreum arquivo com a descricao de um grafo definida no escopo do trabalho.
+ * abre_arquivo() - Abre um arquivo com a descricao de um grafo definida no escopo do trabalho.
  *
  * Retorno: Uma referencia para o arquivo lido. 
  *          Quem chama a funcao eh que libera a memória do arquivo.
@@ -59,6 +61,7 @@ FILE *abre_arquivo(void)
         //Remove o último caractere do caminho, pois o fgets armazena a quebra de linha '\n'
         char *p_chr = strchr(caminho, '\n'); 
         if(p_chr != NULL) *p_chr = '\0';
+
         arquivo = fopen(caminho, "r");
     }
 
@@ -76,22 +79,24 @@ FILE *abre_arquivo(void)
 void le_arquivo(FILE *arquivo, int n_vertices, int n_arcos, int *custos)
 {
     int origem, destino;
-    for(int i = 0; i < n_arcos; i++) { 
+    for(int i = 0; i < n_arcos; i++) {
         fscanf(arquivo, "%d %d", &origem, &destino);
         //Armazena os custos na lista de adjacências
-        fscanf(arquivo, "%d", &custos[(origem-1)*n_vertices+destino-1]); 
+        fscanf(arquivo, "%d", &custos[(origem-1)*n_vertices+destino-1]);
     }
 }
 
 
 void dijkstra(int vertices, int origem, int destino, int *custos)
-{ 
-    int i = 0;          //contador
-    int v = 0;          //variável auxiliar vértice v
-    int anterior[MAXV];      //vetor dos predecessores
-    int fronteira[MAXV];        //vértices para os quais se conhece o caminho mínimo
-    double min;         //variável auxiliar
-    double distancia[MAXV];  //vetor com os custos dos caminhos
+{   
+    int anterior[MAXV];
+    int fronteira[MAXV];
+    double distancia[MAXV];
+
+    //Variaveis auxiliares
+    int i = 0;
+    int v = 0;
+    double min;
 
     //Inicialização
     for(i = 0; i < vertices; i++) {
@@ -100,16 +105,15 @@ void dijkstra(int vertices, int origem, int destino, int *custos)
             distancia[i] = custos[i];
         } else {
             anterior[i] = -1;
-            distancia[i] = INFINITO;
+            distancia[i] = INFINITY;
         }
         fronteira[i] = 0;
     }
     fronteira[origem-1] = 1;
     distancia[origem-1] = 0;
 
-    //Insere o novo vértice que se conhece o caminho mínimo no conjunto fronteira
-    while(v != destino-1 && min != INFINITO){
-        min = INFINITO; 
+    while(v != destino-1 && min != INFINITY){
+        min = INFINITY; 
 
         for(i = 0; i < vertices; i++){
             if(fronteira[i] == 0){
@@ -121,7 +125,7 @@ void dijkstra(int vertices, int origem, int destino, int *custos)
         }
 
         //Distâncias dos novos vizinhos de fronteira
-        if(v != destino-1 && min != INFINITO) {
+        if(v != destino-1 && min != INFINITY) {
             fronteira[v] = 1;
             for(i = 0; i < vertices; i++)
                 if(fronteira[i] == 0) {
@@ -134,7 +138,7 @@ void dijkstra(int vertices, int origem, int destino, int *custos)
     }
 
     //Imprime caminho mínimo de origem a destino
-    if(min == INFINITO) {
+    if(min == INFINITY) {
         printf("\nNão existe caminho entre os vértices %d e %d.\n", origem, destino);
     } else {
         printf("\nCaminho mínimo do vértice %d para o vértice %d: \n", origem, destino);
